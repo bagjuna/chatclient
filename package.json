@@ -12,9 +12,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.25"
+    "@element-plus/icons-vue": "^2.3.2",
+    "@tailwindcss/vite": "^4.1.17",
+    "autoprefixer": "^10.4.22",
+    "axios": "^1.13.2",
+    "element-plus": "^2.12.0",
+    "jwt-decode": "^4.0.0",
+    "pinia": "^3.0.4",
+    "register-service-worker": "^1.7.2",
+    "sockjs-client": "^1.6.1",
+    "tailwindcss": "^4.1.17",
+    "vite-svg-loader": "^5.1.0",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.3",
+    "webstomp-client": "^1.2.6"
   },
   "devDependencies": {
+    "@iconify/vue": "^5.0.0",
     "@vitejs/plugin-vue": "^6.0.2",
     "vite": "^7.2.4",
     "vite-plugin-vue-devtools": "^8.0.5"

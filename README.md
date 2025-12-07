@@ -1,25 +1,73 @@
 # chatclinet
 
-This template should help get you started developing with Vue 3 in Vite.
+# element plus
+```sh
+npm i element-plus --save
+```
 
-## Recommended IDE Setup
+# element plus icons vue
+```sh
+npm install @element-plus/icons-vue --save
+```
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# axios
+```sh
+npm i axios --save
+```
 
-## Recommended Browser Setup
+# jwt-decode
+```sh
+npm i jwt-decode --save
+```
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+# webstomp-client
+```sh
+npm i webstomp-client --save
+```
 
-## Customize configuration
+# sockjs-client
+```sh
+npm i sockjs-client --save
+```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+# tailwindcss
+```sh
+npm install tailwindcss @tailwindcss/vite
+```
 
-## Project Setup
+# @iconify/vue
+```sh
+npm install --save-dev @iconify/vue
+```
+
+# register-service-worker
+```sh   
+npm i register-service-worker --save
+```
+
+# autoprefixer
+```sh
+npm install autoprefixer --save
+```
+
+# vite-svg-loader
+```sh
+npm install vite-svg-loader --save
+```
+
+
+
+### pinia
+```sh
+npm install pinia --save
+```
+
+### vue-router
+```
+npm install vue-router@4 --save
+```
+
+
 
 ```sh
 npm install
@@ -32,7 +80,7 @@ npm run dev
 ```
 
 ### Compile and Minify for Production
-
 ```sh
+
 npm run build
 ```

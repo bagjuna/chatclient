@@ -1,0 +1,69 @@
+{
+  "content": [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}"
+  ],
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "sans": [
+          "Pretendard",
+          "sans-serif"
+        ]
+      },
+      "colors": {
+        "main": "#DA4C24",
+        "black": "#222222",
+        "gray": {
+          "100": "#F2F3F7",
+          "200": "#D5D5D5",
+          "300": "#7A7A7A",
+          "400": "#3B3B3B"
+        },
+        "white": "#FFFFFF",
+        "blue": "#5EA7DF",
+        "pink": {
+          "100": "#F58D80"
+        },
+        "green": "#89B548",
+        "red": "#FC0707",
+        "pastel-lavender": "#F3E8FF",
+        "pastel-lilac": "#EDE9FE",
+        "pastel-babyblue": "#E0F2FE",
+        "pastel-sky": "#DBEAFE",
+        "pastel-mint": "#CCFBF1",
+        "pastel-lightgreen": "#DCFCE7",
+        "pastel-babypink": "#FCE7F3",
+        "pastel-rose": "#FFE4E6",
+        "pastel-salmon": "#FFE2E2",
+        "pastel-peach": "#FFE4F3",
+        "ivory": "#FFF8EA",
+        "orange": {
+          "100": "#FF6900",
+          "200": "#DA4C24",
+          "300": "#B43B1D"
+        }
+      },
+      "backgroundImage": {
+        "gradient": "linear-gradient(to right, #F58D80, #89B548)",
+        "gradient2": "linear-gradient(to right, #FBC4A1, #FF8D44)"
+      },
+      "fontSize": {
+        "8": "0.5rem",
+        "10": "0.625rem",
+        "12": "0.75rem",
+        "14": "0.875rem",
+        "15": "0.9375rem",
+        "16": "1rem",
+        "17": "1.0625rem",
+        "18": "1.125rem",
+        "20": "1.25rem",
+        "24": "1.5rem",
+        "25": "1.5625rem",
+        "26": "1.625rem",
+        "28": "1.75rem",
+        "40": "2.5rem"
+      }
+    }
+  }
+}

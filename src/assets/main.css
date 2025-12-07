@@ -1,11 +1,14 @@
-@import './base.css';
+@import "tailwindcss";
+
 
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+
+  padding: 0;
   font-weight: normal;
 }
+
 
 a,
 .green {
@@ -15,21 +18,105 @@ a,
   padding: 3px;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
 @media (min-width: 1024px) {
   body {
-    display: flex;
-    place-items: center;
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    /*grid-template-columns: 1fr 1fr;*/
+    /*padding: 2rem;*/
+  }
+}
+
+
+
+
+
+/* font-thin */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 100;
+  src: url('/fonts/Pretendard-Thin.otf');
+}
+
+/* font-ExtraLight*/
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 200;
+  src: url('/fonts/Pretendard-ExtraLight.otf');
+}
+
+/* font-Light */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 300;
+  src: url('/fonts/Pretendard-Light.otf');
+}
+
+/* font-Regular */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  src: url('/fonts/Pretendard-Regular.otf');
+}
+
+/* font-Medium */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 500;
+  src: url('/fonts/Pretendard-Medium.otf');
+}
+
+/* font-SemiBold */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 600;
+  src: url('/fonts/Pretendard-SemiBold.otf');
+}
+
+/* font-Bold */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  src: url('/fonts/Pretendard-Bold.otf');
+}
+
+/* font-black */
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 900;
+  src: url('/fonts/Pretendard-Black.otf');
+}
+
+@layer utilities {
+  .shadow-custom {
+    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@layer components {
+  .black {
+    @apply font-black;
+  }
+  .bold {
+    @apply font-bold;
+  }
+  .semibold {
+    @apply font-semibold;
+  }
+  .medium {
+    @apply font-medium;
+  }
+  .regular {
+    @apply font-normal;
+  }
+  .light {
+    @apply font-light;
+  }
+  .extralight {
+    @apply font-extralight;
+  }
+  .thin {
+    @apply font-thin;
   }
 }
