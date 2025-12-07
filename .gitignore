@@ -1,18 +1,45 @@
-# Logs
-logs
-*.log
+
+# 1. 의존성 모듈 (제일 중요! 용량 엄청 큼)
+node_modules/
+.pnpm-store/
+
+# 2. Vite 빌드 결과물 (자동 생성되는 파일들)
+dist/
+dist-ssr/
+coverage/
+
+# 3. 환경변수 및 비밀키 (보안상 절대 금지!)
+.env
+.env.local
+.env.*.local
+*.local
+
+# 4. WebStorm (IDE 설정 파일)
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# 5. OS 시스템 파일 (맥/윈도우 찌꺼기)
+.DS_Store
+Thumbs.db
+
+# 6. 로그 파일 (에러 로그 등)
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+
+# Logs
+logs
+*.log
 lerna-debug.log*
 
 node_modules
-.DS_Store
 dist
 dist-ssr
 coverage
-*.local
 
 # Editor directories and files
 .vscode/*
@@ -34,3 +61,4 @@ coverage
 
 # Vitest
 __screenshots__/
+
