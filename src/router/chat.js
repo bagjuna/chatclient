@@ -5,6 +5,12 @@ export default [
     component: () => import('@/views/ChatRoomView.vue'),
     props: true
   },
+  {
+    path: '/chat-room/list',
+    name: 'chat-room-list',
+    component: () => import('@/views/chat/ChatList.vue'),
+  }
+
   // {
   //   path: 'find-password',
   //   name: 'find-password',

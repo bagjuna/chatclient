@@ -1,23 +1,25 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { postLogin, deleteUser, kakaoLogin } from '@/api/auth.js'
+import {postLogin, deleteUser, kakaoLogin, postSignup} from '@/api/authApi.js'
 
 export const useAuthStore = defineStore('Auth', () => {
   const accessToken = ref(localStorage.getItem('accessToken') || null)
-  const refreshToken = ref(localStorage.getItem('refreshToken') || null)
-  const user = ref(JSON.parse(localStorage.getItem('user')) || null)
+  // const user = ref(JSON.parse(localStorage.getItem('user')) || null)
+  const email = ref(localStorage.getItem('email') || null)
+  const name = ref(localStorage.getItem('name') || null)
   const loading = ref(false)
   const error = ref('')
   const kakakoEmail = ref('')
   const kakaoflag = ref('')
 
-  //카카오 로그인
+  // TODO 카카오 로그인
   const kakaoLoginApi = async (code) => {
     loading.value = true
     error.value = ''
+
     try {
       const res = await kakaoLogin(code)
-      const { member_email, flag, access_token, refresh_token, member } = res
+      const { member_email, flag, accessToken, member } = res
 
       console.log('⭐⭐ flag:', flag)
       kakaoflag.value = flag
@@ -28,18 +30,14 @@ export const useAuthStore = defineStore('Auth', () => {
         console.log('⭐⭐⭐⭐ 피니아 kakaoEmail:', kakakoEmail)
       }
 
-      if (!access_token || !refresh_token || !member) {
+      if (!accessToken || !member) {
         error.value = '로그인 응답이 올바르지 않습니다.'
         return false
       }
 
       //기존 로그인
-      accessToken.value = access_token
-      refreshToken.value = refresh_token
-      user.value = member
-      localStorage.setItem('accessToken', access_token)
-      localStorage.setItem('refreshToken', refresh_token)
-      localStorage.setItem('user', JSON.stringify(member))
+      accessToken.value = accessToken
+      localStorage.setItem('accessToken', accessToken)
 
       return true
     } catch (err) {
@@ -60,6 +58,32 @@ export const useAuthStore = defineStore('Auth', () => {
     }
   }
 
+
+  // 회원가입
+  const signup = async (payload) => {
+    loading.value = true
+    error.value = ''
+
+    try {
+        const res = await postSignup(payload)
+        console.log('🚀 회원가입 응답:', res)
+
+        if (res.status !== 200 || !res.data) {
+            error.value = '회원가입에 실패했습니다.'
+            return false
+        }
+
+        return true
+    }catch (error) {
+        console.error('❌ 회원가입 에러', error)
+        error.value = '회원가입 중 오류가 발생했습니다.'
+        return false
+    }finally {
+        loading.value = false
+    }
+
+  }
+
   // 로그인
   const loginUser = async (payload) => {
     loading.value = true
@@ -68,26 +92,29 @@ export const useAuthStore = defineStore('Auth', () => {
     try {
       // res = { code, message, data }
       const res = await postLogin(payload)
+      console.log('🚀 로그인 응답:', res)
 
-      if (res.code !== 200 || !res.data) {
-        error.value = res.message || '로그인에 실패했습니다.'
+      // 방어 코드: 데이터가 없으면 실패 처리
+      if (res.status !== 200 || !res.data) {
+        error.value = '로그인에 실패했습니다.'
         return false
       }
 
-      const { access_token, refresh_token, member } = res.data
+      const { accessToken: newAccessToken, name: newName, email: newEmail } = res.data
 
-      if (!access_token || !refresh_token || !member) {
+      if (!newAccessToken || !newName || !newEmail) {
         error.value = '로그인 응답이 올바르지 않습니다.'
         return false
       }
 
-      accessToken.value = access_token
-      refreshToken.value = refresh_token
-      user.value = member
+      accessToken.value = newAccessToken
+      name.value = newName
+      email.value = newEmail
 
-      localStorage.setItem('accessToken', access_token)
-      localStorage.setItem('refreshToken', refresh_token)
-      localStorage.setItem('user', JSON.stringify(member))
+      // 로컬 스토리지 저장
+      localStorage.setItem('accessToken', newAccessToken)
+      localStorage.setItem('name', newName)
+      localStorage.setItem('email', newEmail)
 
       return true
     } catch (err) {
@@ -111,8 +138,8 @@ export const useAuthStore = defineStore('Auth', () => {
   // 로그아웃
   const logoutUser = () => {
     accessToken.value = null
-    refreshToken.value = null
-    user.value = null
+    email.value = null
+    name.value = null
     localStorage.clear()
   }
 
@@ -125,7 +152,6 @@ export const useAuthStore = defineStore('Auth', () => {
       if (res.code === 200) {
         // 토큰/유저 정보 초기화
         accessToken.value = null
-        refreshToken.value = null
         user.value = null
         localStorage.clear()
         return true
@@ -144,11 +170,10 @@ export const useAuthStore = defineStore('Auth', () => {
 
   return {
     accessToken,
-    refreshToken,
-    user,
     loading,
     error,
     kakaoflag,
+    signup,
     loginUser,
     logoutUser,
     withdrawUser,

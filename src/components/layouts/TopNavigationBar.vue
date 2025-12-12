@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { computed, ref } from 'vue'
+import { ref, onMounted,computed } from 'vue'
+
 import { Icon } from '@iconify/vue'
 import MenuDrawer from './MenuDrawer.vue'
 
@@ -37,7 +38,7 @@ const goBack = () => {
     </div>
 
     <div
-      v-else-if="pageTitle === '경상났네'"
+      v-else-if="pageTitle === '채팅앱'"
       class="px-4 flex items-center justify-end w-full gap-3"
     >
       <h3 class="bold text-16 absolute left-1/2 -translate-x-1/2 text-black">{{ pageTitle }}</h3>

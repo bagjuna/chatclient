@@ -1,0 +1,21 @@
+{
+  "theme_color": "#FFFFFF",
+  "background_color": "#F4F5F7",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "채팅 앱",
+  "short_name": "PWA",
+  "icons": [
+    {
+      "src": "icons/192-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/512-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -12,6 +12,8 @@ const bgMap = {
 }
 
 const bgColor = computed(() => bgMap[route.meta.bg] || 'bg-white')
+
+
 </script>
 
 <template>

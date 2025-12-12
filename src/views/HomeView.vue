@@ -1,30 +1,29 @@
 <script setup>
 
-import {onMounted} from "vue";
-import api from "@/api/index.js";
-import { reactive} from "vue";
+import {computed, onMounted} from "vue";
+import {useHomeStore} from "@/stores/homeStore.js";
+import {storeToRefs} from "pinia";
 
 
-const stompClient = ref(null)
+// Pinia 스토어를 사용합니다.
+const homeStore = useHomeStore()
 
+// Pinia 스토어의 상태를 Vue 컴포넌트에서 사용하도록 연결합니다.
+const loading = computed(() => homeStore.loading)
+const error = computed(() => homeStore.error)
+const {homeData} = storeToRefs(homeStore);
+// 컴포넌트가 마운트될 때 API를 호출합니다.
 onMounted(async () => {
-  const response = await api.get("/api/members/list");
-  console.log(response.data);
-  state.members = response.data;
-
-  if(stompClient.value && stompClient.value.connected) {
-    return
+  await homeStore.getHomeData()
+  if (homeStore.error) {
+    console.error('❌ 홈 데이터 불러오기 실패')
   }
-  const SockJS = new SockJS('/ws-stomp')
-});
-
-const state = reactive({
-  members: []
-});
-
+})
 
 </script>
 
 <template>
-  {{state.members}}
+  <div>
+    HomeView
+  </div>
 </template>

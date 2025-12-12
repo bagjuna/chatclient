@@ -1,9 +1,21 @@
-import api from './index'
+import api from './indexApi.js'
+
+// 회원가입
+export const postSignup = async ({email, name, password}) => {
+  console.log(email, name, password)
+  const res = await api.post('/api/auth/signup',
+      {
+        name: name,
+        email: email,
+        password: password,
+      })
+  return res
+};
 
 // 로그인
 export const postLogin = async ({ email, password }) => {
   const res = await api.post('/api/auth/login', {
-    member_email: email,
+    email: email,
     password: password,
   })
   return res
@@ -30,11 +42,6 @@ export const resetPassword = async ({ email, password }) => {
   return res
 }
 
-// 회원가입
-export const postSignup = async (payload) => {
-  const res = await api.post('/api/auth/member-info', payload)
-  return res
-}
 
 // 이메일 인증번호 전송
 export const sendEmailCode = async (email) => {
@@ -53,5 +60,5 @@ export const verifyEmailCode = async ({ email, code }) => {
 
 // 회원 탈퇴
 export const deleteUser = () => {
-  return api.delete('/api/auth/member-info')
+  return api.delete('/api/auth/delete')
 }
