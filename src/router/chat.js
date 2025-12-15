@@ -2,13 +2,13 @@ export default [
   {
     path: '/chat-room/:roomId',
     name: 'chat-room',
-    component: () => import('@/views/ChatRoomView.vue'),
+    component: () => import('@/views/chat/ChatRoomView.vue'),
     props: true
   },
   {
-    path: '/chat-room/list',
-    name: 'chat-room-list',
-    component: () => import('@/views/chat/ChatList.vue'),
+    path: '/my-chat-list',
+    name: 'my-chat-list',
+    component: () => import('@/views/chat/MyChatList.vue'),
   }
 
   // {
