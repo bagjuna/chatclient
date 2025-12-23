@@ -62,9 +62,9 @@ const isHidden = computed(
             </div>
           </RouterLink>
 
-          <RouterLink to="/message" class="flex flex-col items-center min-w-0">
+          <RouterLink to="/my-chat-list" class="flex flex-col items-center min-w-0">
             <div class="flex flex-col items-center"
-                 :class="[route.path.startsWith('/message') ? 'text-green-500' : 'text-gray-400']">
+                 :class="[route.path.startsWith('/my-chat-list') ? 'text-green-500' : 'text-gray-400']">
               <Icon icon="ic:round-message" class="w-7 h-7"/>
               <p class="font-semibold text-xs mt-1">메시지</p>
             </div>

@@ -1,13 +1,181 @@
 <script setup>
+import { reactive, onMounted, onUnmounted, computed, nextTick, ref } from 'vue';
+import Stomp from 'webstomp-client';
+import SockJS from 'sockjs-client/dist/sockjs'
+import axios from 'axios';
+
+// 1. Props 정의
 const props = defineProps({
   roomId: {
-    type: [Number, String], // 문자열도 받을 수 있도록 허용
+    type: [Number, String],
     required: true,
   },
-})
+});
 
+// 2. 상태 관리 (State)
+const state = reactive({
+  chatRoom: {
+    bussinessName: '로딩중...', // 초기값
+    memberBadge: '',
+    sosType: '',
+    isOwner: false,
+    isComplete: false,
+    partnerImage: '', // 상대방 이미지 URL
+  },
+  user: {
+    memberEmail: 'myuser@example.com', // [중요] 실제 로그인한 유저 이메일로 교체 필요 (Pinia/Vuex 등에서 가져오기)
+  },
+  messages: [], // 채팅 메시지 리스트
+  newMessage: '', // 입력창 데이터
+  stompClient: null, // STOMP 클라이언트 객체
+});
 
+// 기본 프로필 이미지 (이미지가 없을 경우)
+const defaultProfile = 'https://via.placeholder.com/50';
 
+// 3. Computed: 메시지 날짜별 그룹화 (템플릿에서 사용됨)
+const groupedMessages = computed(() => {
+  const groups = {};
+  state.messages.forEach((msg) => {
+    // 날짜 포맷 (YYYY-MM-DD) 추출
+    const dateStr = new Date(msg.createdAt).toISOString().split('T')[0];
+    if (!groups[dateStr]) {
+      groups[dateStr] = [];
+    }
+    groups[dateStr].push(msg);
+  });
+  return groups;
+});
+
+// 4. 날짜 포맷 함수 (템플릿에서 사용됨)
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+  return new Date(dateString).toLocaleDateString('ko-KR', options);
+};
+
+// 텍스트 매핑 (sosType 등)
+const sosTypeKorean = computed(() => {
+  // 예시 로직
+  return state.chatRoom.sosType === 'URGENT' ? '긴급' : '일반';
+});
+
+const completionButtonText = computed(() => {
+  return state.chatRoom.isComplete ? '완료됨' : '완료하기';
+});
+
+// 5. 스크롤 하단 이동 함수
+const chatAreaRef = ref(null); // main 태그에 ref="chatAreaRef" 추가 필요 (템플릿 수정 필요)
+const scrollToBottom = async () => {
+  await nextTick();
+  const chatArea = document.querySelector('.chat-area');
+  if (chatArea) {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+};
+
+// 6. API: 채팅 기록 가져오기
+const loadChatHistory = async () => {
+  try {
+    const response = await axios.get(`/api/chat/history/${props.roomId}`);
+    // 백엔드에서 받은 데이터가 시간순 정렬되어 있다고 가정
+    state.messages = response.data;
+    scrollToBottom();
+  } catch (error) {
+    console.error('채팅 기록 로드 실패:', error);
+  }
+};
+
+// 7. WebSocket (STOMP) 연결 설정
+const connectWebSocket = () => {
+  // SockJS 엔드포인트 (백엔드 WebSocketConfig의 registry.addEndpoint("/ws-stomp") 와 일치해야 함)
+  const socket = new SockJS('http://localhost:8080/api/connect');
+
+  state.stompClient = Stomp.over(socket);
+
+  // 디버그 로그 끄기 (원하면 주석 해제)
+  // state.stompClient.debug = () => {};
+
+  state.stompClient.connect(
+      {}, // Header (JWT 토큰 등이 필요하면 여기에 추가: { Authorization: 'Bearer ...' })
+      (frame) => {
+        console.log('STOMP Connected:', frame);
+
+        // 구독 (Subscribe): 백엔드 StompController의 @SendTo("/topic/{roomId}") 와 일치
+        state.stompClient.subscribe(`/topic/${props.roomId}`, (message) => {
+          const receivedMsg = JSON.parse(message.body);
+
+          // 실시간 메시지 수신 시 리스트에 추가
+          // 수신된 메시지에 createdAt이 없다면 현재 시간 추가
+          if(!receivedMsg.createdAt) receivedMsg.createdAt = new Date().toISOString();
+
+          state.messages.push(receivedMsg);
+          scrollToBottom();
+
+          // 내가 보낸 메시지가 아니라면 읽음 처리 API 호출 (선택 사항)
+          if (receivedMsg.senderEmail !== state.user.memberEmail) {
+            markAsRead();
+          }
+        });
+      },
+      (error) => {
+        console.error('STOMP Connection Error:', error);
+      }
+  );
+};
+
+// 8. 메시지 전송
+const sendMessage = () => {
+  if (!state.newMessage.trim() || !state.stompClient) return;
+
+  const chatMessageDto = {
+    roomId: props.roomId,
+    senderEmail: state.user.memberEmail,
+    message: state.newMessage,
+    // createdAt은 백엔드에서 처리하거나 여기서 보낼 수 있음
+  };
+
+  try {
+    // 발행 (Publish): 백엔드 @MessageMapping("/{roomId}") -> prefix 설정에 따라 /app/{roomId} 또는 /pub/{roomId}
+    // 일반적인 Spring Boot 설정에서는 /app 또는 /pub을 prefix로 둡니다.
+    // 만약 백엔드 설정에 prefix가 없다면 그냥 `/${props.roomId}` 입니다.
+    state.stompClient.send(`/pub/${props.roomId}`, {}, JSON.stringify(chatMessageDto));
+
+    state.newMessage = ''; // 입력창 초기화
+  } catch (error) {
+    console.error('메시지 전송 실패:', error);
+  }
+};
+
+// 읽음 처리 API
+const markAsRead = async () => {
+  try {
+    await axios.post(`/api/chat/room/${props.roomId}/read`);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+// 모달 관련 (더미 함수)
+const isCompleteModalVisible = ref(false);
+const openCompleteModal = () => { isCompleteModalVisible.value = true; };
+const closeCompleteModal = () => { isCompleteModalVisible.value = false; };
+const handleSosComplete = () => { /* 완료 로직 */ closeCompleteModal(); };
+
+// 라이프사이클 훅
+onMounted(() => {
+  // 1. 채팅방 정보 로드 (필요하다면 API 호출 추가)
+  // 2. 채팅 기록 로드
+  loadChatHistory();
+  // 3. 소켓 연결
+  connectWebSocket();
+});
+
+onUnmounted(() => {
+  // 컴포넌트 해제 시 소켓 연결 종료
+  if (state.stompClient && state.stompClient.connected) {
+    state.stompClient.disconnect();
+  }
+});
 </script>
 
 
