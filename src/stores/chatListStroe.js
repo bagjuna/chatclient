@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import api from '@/api/chatListApi.js'
 
-export const useChatRoomStore = defineStore('chatRoom', () => {
+export const useChatListStore = defineStore('chatList', () => {
     const loading = ref(false)
     const error = ref(null)
 

@@ -1,11 +1,11 @@
 <script setup>
 import {ref, onMounted, computed} from 'vue'
 import ChatList from '@/components/chat/ChatList.vue'
-import {useChatRoomStore} from '@/stores/chatListStroe.js'
+import {useChatListStore} from '@/stores/chatListStroe.js'
 import {storeToRefs} from 'pinia'
 
 
-const chatStore = useChatRoomStore()
+const chatStore = useChatListStore()
 const {chatRoomList, loading} = storeToRefs(chatStore)
 
 

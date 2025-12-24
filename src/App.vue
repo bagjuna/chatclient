@@ -12,7 +12,7 @@ const bgMap = {
 }
 
 const bgColor = computed(() => bgMap[route.meta.bg] || 'bg-white')
-
+const isChatRoom = computed(() => route.path.includes('/chat-room/'));
 
 </script>
 
@@ -23,7 +23,7 @@ const bgColor = computed(() => bgMap[route.meta.bg] || 'bg-white')
         class="relative w-full h-dvh md:max-w-[365px] flex flex-col overflow-hidden"
         :class="bgColor"
     >
-      <TopNavigationBar/>
+      <TopNavigationBar v-if="!isChatRoom" />
 
       <div class="pt-[56px] pb-[60px] flex-1 min-h-0 flex flex-col items-stretch overflow-hidden">
         <RouterView/>

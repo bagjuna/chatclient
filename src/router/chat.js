@@ -3,7 +3,8 @@ export default [
     path: '/chat-room/:roomId',
     name: 'chat-room',
     component: () => import('@/views/chat/ChatRoomView.vue'),
-    props: true
+    props: true,
+    meta: { hideBottomNav: true }
   },
   {
     path: '/my-chat-list',

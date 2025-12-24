@@ -31,48 +31,43 @@ function goToChatRoom(roomId) {
   emit('select', roomId)
 }
 </script>
-
 <template>
-  <ul>
+  <ul class="divide-y divide-gray-100">
     <li
-      v-for="chat in chats"
-      :key="chat.roomId"
-      class="flex items-center gap-3 px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
-      @click="goToChatRoom(chat.roomId)"
+        v-for="chat in chats"
+        :key="chat.roomId"
+        class="flex items-center gap-4 px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
+        @click="goToChatRoom(chat.roomId)"
     >
-      <!-- 프로필 이미지 -->
-      <img
-        :src="
-            chat?.roomImage
-              ? chat?.roomImage + '?t=' + Date.now()
-              : defaultProfile
-          "
-        alt="프로필"
-        class="w-12 h-12 rounded-md object-cover bg-gray-100 flex-shrink-0"
-      />
+      <div class="relative flex-shrink-0">
+        <img
+            :src="chat?.roomImage ? chat?.roomImage + '?t=' + Date.now() : defaultProfile"
+            alt="프로필"
+            class="w-14 h-14 rounded-2xl object-cover bg-gray-100 shadow-sm"
+        />
+      </div>
 
-      <!-- 채팅 내용 -->
       <div class="flex-1 min-w-0">
-        <div class="flex justify-between items-center">
-          <p class="font-medium text-15 truncate">{{ chat.name }}</p>
-          <span class="text-12 text-gray-400">
+        <div class="flex justify-between items-center mb-1">
+          <p class="font-bold text-[16px] text-gray-900 truncate">
+            {{ chat.roomName || chat.name }}
+          </p>
+          <span class="text-[12px] text-gray-400 whitespace-nowrap ml-2">
             {{ formatTime(chat.lastMessageTime) }}
           </span>
         </div>
-        <div class="flex justify-between items-center mt-1">
-          <p class="text-14 text-gray-600 truncate">
-            {{ chat.lastMessage }}
+
+        <div class="flex justify-between items-end">
+          <p class="text-[14px] text-gray-500 truncate pr-4">
+            {{ chat.lastMessage || '메시지가 없습니다.' }}
           </p>
-          <p class="text-14 text-gray-600 truncate">
-            {{ chat.roomName }}
-          </p>
-          <!-- 안 읽은 메시지 개수 -->
-          <span
-            v-if="chat.unReadCount != null && chat.unReadCount > 0"
-            class="ml-2 px-2 py-0.5 bg-main text-white text-12 rounded-full flex-shrink-0"
+
+          <div
+              v-if="chat.unReadCount > 0"
+              class="min-w-[20px] h-[20px] px-1.5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center flex-shrink-0 animate-pulse-subtle"
           >
-            {{ chat.unReadCount }}
-          </span>
+            {{ chat.unReadCount > 99 ? '99+' : chat.unReadCount }}
+          </div>
         </div>
       </div>
     </li>
@@ -80,5 +75,20 @@ function goToChatRoom(roomId) {
 </template>
 
 <style scoped>
+/* 텍스트가 너무 길 때 말줄임표 처리 */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
+/* 약간의 애니메이션 효과 (선택사항) */
+@keyframes pulse-subtle {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.animate-pulse-subtle {
+  /* 새로운 메시지 강조를 원할 경우 추가 */
+}
 </style>

@@ -13,6 +13,7 @@ const hiddenPrefixes = [
 // '/search',
 // '/call',
 // '/friends'
+    '/chat-room/'
 ]
 const hiddenRouteNames = ['announceDocsCheckList']
 
