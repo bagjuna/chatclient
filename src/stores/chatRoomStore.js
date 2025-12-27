@@ -55,7 +55,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         if (!token) return;
 
         // 소켓 엔드포인트 설정
-        const socket = new SockJS(`http://localhost:8080/api/connect?token=${token}`);
+        const socket = new SockJS(`http://localhost:8080/api/connect`);
         stompClient.value = Stomp.over(socket);
         // stompClient.value.debug = () => {}; // 로그 끄려면 주석 해제
 

@@ -4,8 +4,11 @@ const BASE_URL = '/api/chat/room'
 
 export default {
     // 채팅방 목록 조회
-    async getChatRoomList() {
-        const res = await api.get(`${BASE_URL}/group/list`)
+    async getChatRoomList(params) {
+        const res = await api.get(`${BASE_URL}/group/list`, {
+                params: params
+            }
+        )
         return res
     },
 
@@ -14,7 +17,6 @@ export default {
         const res = await api.get(`${BASE_URL}/my/rooms`)
         return res
     },
-
 
 
 }

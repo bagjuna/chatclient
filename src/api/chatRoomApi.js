@@ -19,5 +19,23 @@ export default {
     async joinGroupChat(roomId) {
         const res = await api.post(`/api/chat/room/group/${roomId}/join`);
         return res;
+    },
+
+    // 4. 비밀번호 채팅방 입장 요청
+    async joinSecretChat(roomId, password) {
+        const res = await api.post(`/api/chat/room/secret/${roomId}/join`, {password});
+        return res;
+    },
+
+    // 5. 채팅방 생성
+    async createGroupChat({ roomName, maxParticipantCnt, isSecret, password }
+    ) {
+        const res = await api.post(`/api/chat/room/group/create`, {
+            roomName: roomName,
+            maxParticipantCnt: maxParticipantCnt,
+            isSecret: isSecret,
+            password: password
+        });
+        return res;
     }
 }
