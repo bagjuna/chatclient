@@ -9,6 +9,12 @@ export default {
         return res.data;
     },
 
+    // 1-2. 채팅방 참여자 정보 조회
+    async getParticipants(roomId) {
+        const res = await api.get(`/api/chat/room/${roomId}/participants`);
+        return res.data;
+    },
+
     // 2. 메시지 읽음 처리
     async readChatMessage(roomId) {
         const res = await api.post(`/api/chat/room/${roomId}/read`);
@@ -31,10 +37,10 @@ export default {
     async createGroupChat({ roomName, maxParticipantCnt, isSecret, password }
     ) {
         const res = await api.post(`/api/chat/room/group/create`, {
-            roomName: roomName,
-            maxParticipantCnt: maxParticipantCnt,
-            isSecret: isSecret,
-            password: password
+            roomName,
+            maxParticipantCnt,
+            isSecret,
+            password
         });
         return res;
     }

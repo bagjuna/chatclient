@@ -56,6 +56,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('ko-KR', options);
 };
 </script>
+
 <template>
 <!--  <div class="flex flex-col h-[100dvh] bg-white relative z-[50]">-->
     <div class="flex flex-col h-full bg-white relative z-[50]">
@@ -67,51 +68,64 @@ const formatDate = (dateString) => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 class="font-bold text-lg">채팅방</h1>
+          <h1 class="font-bold text-lg"></h1>
         </div>
       </div>
     </div>
 
-    <main class="flex-1 overflow-y-auto p-4 pb-24 bg-slate-50 chat-area">
-
-      <div v-if="store.messages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
-        <p>대화 내용이 없습니다.</p>
-        <p>첫 메시지를 보내보세요!</p>
-      </div>
-
-      <div v-for="(messagesInDate, date) in store.groupedMessages" :key="date">
-        <div class="my-6 text-center">
+      <main class="flex-1 overflow-y-auto p-4 pb-24 bg-slate-50 chat-area">
+        <div v-for="(messagesInDate, date) in store.groupedMessages" :key="date">
+          <div class="my-6 text-center">
             <span class="text-xs text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
                 {{ formatDate(date) }}
             </span>
-        </div>
+          </div>
 
-        <div v-for="msg in messagesInDate" :key="msg.id" class="mb-4 flex flex-col">
-          <div v-if="msg.senderEmail !== store.myEmail" class="flex items-end self-start max-w-[75%]">
-            <div class="mr-2 flex-shrink-0 h-9 w-9 rounded-full bg-gray-300 overflow-hidden border border-gray-200">
-              <img :src="defaultProfile" class="w-full h-full object-cover" />
-            </div>
-            <div class="flex flex-col items-start">
-              <div class="rounded-2xl rounded-tl-none bg-white px-4 py-2 shadow-sm border border-gray-100">
-                <p class="text-sm text-gray-800 break-words leading-relaxed">{{ msg.message }}</p>
+          <div v-for="msg in messagesInDate" :key="msg.id" class="mb-4 flex flex-col">
+
+            <div v-if="msg.senderEmail !== store.myEmail" class="flex items-end self-start max-w-[75%]">
+              <div class="mr-2 flex-shrink-0 h-9 w-9 rounded-full bg-gray-300 overflow-hidden border border-gray-200">
+                <img :src="defaultProfile" class="w-full h-full object-cover" />
+              </div>
+
+              <div class="flex flex-col items-start">
+                <p class="text-sm text-gray-900 mb-1">
+                  {{ msg.senderName }}
+                </p>
+                <div class="rounded-2xl rounded-tl-none bg-white px-4 py-2 shadow-sm border border-gray-100">
+                  <p class="text-sm text-gray-800 break-words leading-relaxed">{{ msg.message }}</p>
+                </div>
+              </div>
+
+              <div class="ml-2 flex flex-col items-start justify-end flex-shrink-0 mb-1">
+              <span v-if="msg.unreadCount > 0" class="text-[10px] font-bold text-yellow-500 mb-0.5">
+                {{ msg.unreadCount }}
+              </span>
+                <span class="text-[10px] text-gray-400">
+                {{ new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              </span>
               </div>
             </div>
-            <span class="ml-2 text-[10px] text-gray-400 mb-1 flex-shrink-0">
-              {{ new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </span>
-          </div>
 
-          <div v-else class="flex items-end self-end max-w-[75%] justify-end">
-            <span class="mr-2 text-[10px] text-gray-400 mb-1 flex-shrink-0">
-              {{ new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </span>
-            <div class="rounded-2xl rounded-tr-none bg-green-500 px-4 py-2 text-white shadow-md">
-              <p class="text-sm break-words leading-relaxed">{{ msg.message }}</p>
+            <div v-else class="flex items-end self-end max-w-[75%] justify-end">
+
+              <div class="mr-2 flex flex-col items-end justify-end flex-shrink-0 mb-1">
+              <span v-if="msg.unreadCount > 0" class="text-[10px] font-bold text-yellow-500 mb-0.5">
+                {{ msg.unreadCount }}
+              </span>
+                <span class="text-[10px] text-gray-400">
+                {{ new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              </span>
+              </div>
+
+              <div class="rounded-2xl rounded-tr-none bg-green-500 px-4 py-2 text-white shadow-md">
+                <p class="text-sm break-words leading-relaxed">{{ msg.message }}</p>
+              </div>
             </div>
+
           </div>
         </div>
-      </div>
-    </main>
+      </main>
 
     <footer class="flex-none w-full bg-white p-3 border-t pb-4 md:pb-6 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
       <div class="flex items-center gap-2">

@@ -1,9 +1,8 @@
 import axios from 'axios';
-import router from "@/router/index.js";
 // ⚠️ 주의: 여기서 store를 바로 import해서 쓰면 Pinia 초기화 전이라 에러날 수 있음
 // 대신 로컬스토리지나 window 객체를 활용하는 게 안전합니다.
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 
 const api = axios.create({
     baseURL: BASE_URL,
