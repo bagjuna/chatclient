@@ -7,7 +7,6 @@ import defaultProfile from '@/assets/images/banner.png'; // 이미지 경로 확
 // 라우터에서 roomId 가져오기 (Props로 받아도 됨)
 const route = useRoute();
 const roomId = route.params.roomId; // 또는 props.roomId
-
 // 스토어 연결
 const store = useChatRoomStore();
 
@@ -60,18 +59,24 @@ const formatDate = (dateString) => {
 <template>
 <!--  <div class="flex flex-col h-[100dvh] bg-white relative z-[50]">-->
     <div class="flex flex-col h-full bg-white relative z-[50]">
-    <div class="flex-none bg-white border-b z-10 w-full">
-      <div class="flex items-center justify-between px-4 pb-3 pt-4 md:pt-6">
-        <div class="flex items-center gap-3">
-          <button @click="$router.back()" class="text-gray-600 p-1">
+      <div class="flex-none bg-white border-b z-10 w-full">
+        <div class="flex items-center justify-between px-4 pb-3 pt-4 md:pt-6">
+
+          <div class="flex items-center gap-3 min-w-0"> <button @click="$router.back()" class="text-gray-600 p-1 shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 class="font-bold text-lg"></h1>
+
+            <h1 class="font-bold text-lg truncate">{{ store.roomInfo.roomName }}</h1>
+          </div>
+
+          <h2 class="font-bold text-lg whitespace-nowrap ml-4">
+            {{ store.roomInfo.participantCnt }} 명
+          </h2>
+
         </div>
       </div>
-    </div>
 
       <main class="flex-1 overflow-y-auto p-4 pb-24 bg-slate-50 chat-area">
         <div v-for="(messagesInDate, date) in store.groupedMessages" :key="date">

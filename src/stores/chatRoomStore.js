@@ -1,6 +1,6 @@
 // src/stores/chatRoomStore.js
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import {ref, computed, reactive} from 'vue';
 import chatRoomApi from '@/api/chatRoomApi.js';
 import SockJS from 'sockjs-client/dist/sockjs';
 import Stomp from 'webstomp-client'; // 또는 사용 중인 stomp 라이브러리
@@ -8,12 +8,16 @@ import Stomp from 'webstomp-client'; // 또는 사용 중인 stomp 라이브러�
 export const useChatRoomStore = defineStore('chatRoom', () => {
     // --- State ---
     const messages = ref([]);      // 채팅 메시지 리스트
-    const roomInfo = ref({});      // 채팅방 정보 (상대방 프로필 등)
+    const roomInfo = reactive({
+        roomId: null,
+        roomName: '',
+        isSecret: false,
+        participantCnt: 0,
+    });
     const stompClient = ref(null); // 소켓 클라이언트
     const isConnected = ref(false);
     const myEmail = ref(localStorage.getItem('email') || ''); // 내 이메일 정보
     const myName = ref(localStorage.getItem('name') || '');
-    const roomName = ref('');
 
     const lastReadMap = ref({}); // 예: { 'email1': 100, 'email2': 105 }
 

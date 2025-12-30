@@ -1,6 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import defaultProfile from '@/assets/images/banner.png'
+import {useChatRoomStore} from "@/stores/chatRoomStore.js";
+const chatRoomStore = useChatRoomStore()
 
 // Props
 const props = defineProps({
@@ -26,9 +28,16 @@ function formatTime(timeStr) {
 }
 
 // 특정 채팅방으로 이동
-function goToChatRoom(roomId) {
-  router.push(`/chat-room/${roomId}`)
-  emit('select', roomId)
+function goToChatRoom(chat) {
+  chatRoomStore.roomInfo = {
+    roomId: chat.roomId,
+    roomName: chat.roomName,
+    isSecret: chat.isSecret,
+    participantCnt:  chat.participantCnt,
+  }
+  router.push(`/chat-room/${chat.roomId}`)
+
+  // emit('select', roomId)
 }
 </script>
 <template>
@@ -37,7 +46,7 @@ function goToChatRoom(roomId) {
         v-for="chat in chats"
         :key="chat.roomId"
         class="flex items-center gap-4 px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
-        @click="goToChatRoom(chat.roomId)"
+        @click="goToChatRoom(chat)"
     >
       <div class="relative flex-shrink-0">
         <img
