@@ -20,9 +20,9 @@ npm i axios --save
 npm i jwt-decode --save
 ```
 
-# webstomp-client
+# stomp/stompjs
 ```sh
-npm i webstomp-client --save
+npm install @stomp/stompjs --save
 ```
 
 # sockjs-client

@@ -1,9 +1,9 @@
 // src/stores/chatRoomStore.js
 import { defineStore } from 'pinia';
-import {ref, computed, reactive} from 'vue';
+import {ref, shallowRef, computed, reactive} from 'vue';
 import chatRoomApi from '@/api/chatRoomApi.js';
 import SockJS from 'sockjs-client/dist/sockjs';
-import Stomp from 'webstomp-client'; // 또는 사용 중인 stomp 라이브러리
+import { Client } from '@stomp/stompjs';
 
 export const useChatRoomStore = defineStore('chatRoom', () => {
     // --- State ---
@@ -14,12 +14,14 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         isSecret: false,
         participantCnt: 0,
     });
-    const stompClient = ref(null); // 소켓 클라이언트
+    const stompClient = shallowRef(null);
     const isConnected = ref(false);
     const myEmail = ref(localStorage.getItem('email') || ''); // 내 이메일 정보
     const myName = ref(localStorage.getItem('name') || '');
 
     const lastReadMap = ref({}); // 예: { 'email1': 100, 'email2': 105 }
+
+    const isReconnecting = ref(false); // 재연결 시도 중인지 여부
 
     // --- Getters (Computed) ---
     // 날짜별 메시지 그룹화 (UI에서 쓰기 편하게 가공)
@@ -66,54 +68,69 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         if (!token) return;
 
         // 소켓 엔드포인트 설정
-        const socket = new SockJS(`http://localhost:8080/api/connect`);
-        stompClient.value = Stomp.over(socket);
+        stompClient.value = new Client({
+            // 1. SockJS 연결 팩토리
+            webSocketFactory: () => new SockJS('http://localhost:8080/api/connect'),
 
-        stompClient.value.connect(
-            { Authorization: `Bearer ${token}` }, // 헤더
-            (frame) => {
+            // 2. 헤더 설정 (토큰 등)
+            connectHeaders: {
+                Authorization: `Bearer ${token}`
+            },
+
+            // 3. 자동 재연결 설정 (5초) - 이거 하나면 재연결 로직 끝!
+            reconnectDelay: 5000,
+
+            // 4. 연결 성공 시 실행될 콜백
+            onConnect: (frame) => {
                 isConnected.value = true;
                 console.log('소켓 연결 성공:', frame);
 
-                // 구독 (Subscribe)
+                // [구독]
                 stompClient.value.subscribe(`/topic/${roomId}`, (tick) => {
                     const receivedMsg = JSON.parse(tick.body);
                     console.log('수신된 메시지:', receivedMsg);
                     onMessageReceived(receivedMsg, roomId);
+
                 });
-                // 🔥 연결 되자마자 "나 여기까지 읽었어!" 신호 보내기
+
+                // [입장 직후 읽음 처리 로직] - 기존 코드 그대로 이식
                 if (messages.value.length > 0) {
-                    // 1. 현재 로딩된 메시지 중 가장 마지막 메시지 가져오기
                     const lastMessage = messages.value[messages.value.length - 1];
                     const lastMessageId = lastMessage.messageId || lastMessage.id;
 
-                    // 2. READ 패킷 전송
                     if (lastMessageId) {
                         const readPayload = {
                             messageType: 'READ',
                             roomId: roomId,
                             senderEmail: myEmail.value,
                             senderName: myName.value,
-                            messageId: lastMessageId // 가장 최신 메시지 ID
+                            messageId: lastMessageId
                         };
-
                         console.log("🚀 입장 직후 읽음 처리 전송:", readPayload);
 
-                        stompClient.value.send(
-                            `/pub/${roomId}`,
-                            JSON.stringify(readPayload),
-                            {}
-                        );
-
+                        stompClient.value.publish({
+                            destination: `/pub/${roomId}`,
+                            body: JSON.stringify(readPayload)
+                        });
                     }
                 }
-
             },
-            (error) => {
-                console.error('소켓 연결 오류:', error);
+
+            // 5. 연결 끊김/에러 핸들링
+            onStompError: (frame) => {
+                console.error('브로커 에러:', frame.headers['message']);
+                console.error('세부 내용:', frame.body);
+                isConnected.value = false;
+            },
+            onWebSocketClose: () => {
+                console.log('연결이 끊어졌습니다. (재연결 대기 중...)');
                 isConnected.value = false;
             }
-        );
+        });
+
+        // [변경 5] 설정 끝났으니 연결 시작!
+        stompClient.value.activate();
+
     };
 
     // 2-2. 참여자 정보 설정 함수
@@ -168,12 +185,10 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
                         messageId: targetId
                     };
 
-                    // 서버로 전송
-                    stompClient.value.send(
-                        `/pub/${roomId}`,
-                        JSON.stringify(readPayload),
-                        {}
-                    );
+                    stompClient.value.publish({
+                        destination: `/pub/${roomId}`,
+                        body: JSON.stringify(readPayload)
+                    });
 
                     // (선택) 내 화면에서도 내 커서를 즉시 업데이트 (소켓 응답 기다리지 않고 반영)
                     handleReadReceipt(myEmail.value, targetId);
@@ -185,7 +200,8 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             // 서버에서 "누가(senderId), 몇번 메시지까지(messageId) 읽었는지" 보내줘야 함
             handleReadReceipt(msg.senderEmail, msg.messageId);
 
-        } else if (type === 'ENTER') { // [수정] msg.type -> type
+        }
+        else if (type === 'ENTER') { // [수정] msg.type -> type
             messages.value.push({
                 isSystem: true,
                 content: msg.message, // DTO에 message 필드에 내용이 있는지 확인
@@ -223,48 +239,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         lastReadMap.value[readerEmail] = newReadMessageId;
     };
 
-    // // [함수 분리] 읽음 신호 보내기 (HTTP 아님! 소켓임!)
-    // const sendReadPacket = (roomId, messageId) => {
-    //     if (!stompClient.value || !isConnected.value) return;
     //
-    //     const payload = {
-    //         messageType: 'READ',
-    //         roomId: roomId,
-    //         senderEmail: myEmail.value,
-    //         senderName: myName.value,
-    //         messageId: messageId
-    //     };
-    //
-    //     stompClient.value.send(
-    //         `/pub/${roomId}`, // Destination
-    //         JSON.stringify(payload), // Body
-    //         {},                    // Header
-    //     );
-    //     // 서버의 @MessageMapping("/{roomId}") 로 전송
-    // };
-    //
-    // // [UI 업데이트] 숫자 1 없애기 (중복 차감 방지 로직 추가)
-    // const updateReadCountUI = (readCursorId, readerEmail) => {
-    //     messages.value.forEach((m) => {
-    //         // 1. 해당 메시지(m)에 '읽은 사람 목록(readBy)'이 없으면 초기화
-    //         if (!m.readBy) {
-    //             m.readBy = new Set();
-    //         }
-    //
-    //         // 2. 조건:
-    //         //    (A) 읽은 커서(readCursorId)보다 과거 메시지이고
-    //         //    (B) 안 읽은 숫자가 0보다 크고
-    //         //    (C) [중요] 이 사람(readerEmail)이 아직 이 메시지를 처리하지 않았을 때만!
-    //         if (m.messageId <= readCursorId && m.unreadCount > 0 && !m.readBy.has(readerEmail)) {
-    //
-    //             // 3. 숫자 감소
-    //             m.unreadCount = Math.max(0, m.unreadCount - 1);
-    //
-    //             // 4. [핵심] "이 사람은 처리했음" 도장 쾅! (Set에 추가)
-    //             m.readBy.add(readerEmail);
-    //         }
-    //     });
-    // };
 
 
 
@@ -279,23 +254,22 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             senderName: myName.value,
             message: content,
         };
-
         // 발행 (Publish)
-        stompClient.value.send(`/pub/${roomId}`,
-            JSON.stringify(chatMessageDto),
-            {}
-        )
-        ;
+        stompClient.value.publish({
+            destination: `/pub/${roomId}`,
+            body: JSON.stringify(chatMessageDto)
+        });
+
     };
 
     // 5. 방 퇴장 (연결 종료)
     const disconnect = () => {
-        if (stompClient.value && stompClient.value.connected) {
-            stompClient.value.disconnect();
+        if (stompClient.value) {
+            stompClient.value.deactivate(); // disconnect 대신 deactivate 사용
+            stompClient.value = null;
+            isConnected.value = false;
             console.log('소켓 연결 종료');
         }
-        isConnected.value = false;
-        messages.value = [];
     };
 
     return {
