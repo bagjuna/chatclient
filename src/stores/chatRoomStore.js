@@ -93,7 +93,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
 
                 });
 
-                // [입장 직후 읽음 처리 로직] - 기존 코드 그대로 이식
+                // [입장 직후 읽음 처리 로직]
                 if (messages.value.length > 0) {
                     const lastMessage = messages.value[messages.value.length - 1];
                     const lastMessageId = lastMessage.messageId || lastMessage.id;
@@ -191,7 +191,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
                     });
 
                     // (선택) 내 화면에서도 내 커서를 즉시 업데이트 (소켓 응답 기다리지 않고 반영)
-                    handleReadReceipt(myEmail.value, targetId);
+                    // handleReadReceipt(myEmail.value, targetId);
                 }
             }
 
@@ -209,6 +209,30 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             });
         }
     };
+
+    const messageRead = (msg,roomId) => {
+        if (msg.senderEmail !== myEmail.value) {
+            const targetId = msg.messageId || msg.id;
+
+            if (targetId) {
+                const readPayload = {
+                    messageType: 'READ',
+                    roomId: roomId,
+                    senderEmail: myEmail.value,
+                    senderName: myName.value,
+                    messageId: targetId
+                };
+
+                stompClient.value.publish({
+                    destination: `/pub/${roomId}`,
+                    body: JSON.stringify(readPayload)
+                });
+
+                // (선택) 내 화면에서도 내 커서를 즉시 업데이트 (소켓 응답 기다리지 않고 반영)
+                // handleReadReceipt(myEmail.value, targetId);
+            }
+        }
+    }
 
 
     const handleReadReceipt = (readerEmail, newReadMessageId) => {
