@@ -201,7 +201,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             handleReadReceipt(msg.senderEmail, msg.messageId);
 
         }
-        else if (type === 'ENTER') { // [수정] msg.type -> type
+        else if (type === 'ENTER') {
             messages.value.push({
                 isSystem: true,
                 content: msg.message, // DTO에 message 필드에 내용이 있는지 확인
