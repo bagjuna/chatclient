@@ -170,6 +170,7 @@ export const useAuthStore = defineStore('Auth', () => {
 
   return {
     accessToken,
+    name,
     loading,
     error,
     kakaoflag,
