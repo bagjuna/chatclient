@@ -8,24 +8,23 @@ const props = defineProps({
 })
 
 const classes = computed(() => {
-  console.log('Button props:', props.color, props.disabled)
   if (props.disabled) {
     return 'bg-gray-300 text-white cursor-not-allowed'
   }
 
   switch (props.color) {
     case 'main':
-      return 'bg-main text-white'
+      return 'bg-green-500 hover:bg-green-600 text-white'
     case 'yellow':
-      return 'bg-yellow text-black'
+      return 'bg-amber-300 text-black'
     case 'gray':
       return 'bg-gray-200 text-black'
     case 'gray-300':
       return 'bg-gray-300 text-white'
     case 'blue':
-      return 'bg-blue-200 text-white'
+      return 'bg-blue-500 hover:bg-blue-600 text-white'
     case 'green':
-      return 'bg-green-100 text-white'
+      return 'bg-emerald-500 hover:bg-emerald-600 text-white'
     default:
       return 'bg-gray-100 text-black'
   }
@@ -37,7 +36,7 @@ const classes = computed(() => {
     :type="type"
     :disabled="disabled"
     :class="[
-      'mx-auto w-[340px] h-[40px] flex items-center justify-center rounded-xl font-semibold text-20 transition',
+      'mx-auto w-[340px] h-[40px] flex items-center justify-center rounded-xl font-semibold text-20 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300',
       classes,
     ]"
   >

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore.js'
+import BaseButton from '@/components/common/BaseButton.vue'
 
 const authStore = useAuthStore()
 
@@ -8,6 +9,7 @@ const profileImage = ref(localStorage.getItem('profileImage') || '')
 const selectedFileName = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+const fileInputRef = ref(null)
 
 const userName = computed(() => authStore.name || localStorage.getItem('name') || '-')
 const userEmail = computed(() => authStore.email || localStorage.getItem('email') || '-')
@@ -15,6 +17,10 @@ const avatarFallback = computed(() => {
   const text = userName.value || ''
   return text.trim().charAt(0) || '?'
 })
+
+function openFilePicker() {
+  fileInputRef.value?.click()
+}
 
 function handleFileChange(event) {
   const file = event.target.files?.[0]
@@ -73,14 +79,12 @@ function handleFileChange(event) {
       </div>
 
       <div class="mt-6">
-        <label
-          for="profile-image-input"
-          class="inline-flex items-center justify-center rounded-lg bg-blue text-white text-14 semibold px-4 py-2 cursor-pointer"
-        >
+        <BaseButton color="main" class="w-full max-w-[340px] h-10 text-14" @click="openFilePicker">
           이미지 변경
-        </label>
+        </BaseButton>
         <input
           id="profile-image-input"
+          ref="fileInputRef"
           type="file"
           accept="image/*"
           class="hidden"
