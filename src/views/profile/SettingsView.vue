@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore.js'
 import BaseButton from '@/components/common/BaseButton.vue'
+import { getProfileImage, uploadProfileImage } from '@/api/profileApi.js'
 
 const authStore = useAuthStore()
 
@@ -22,7 +23,7 @@ function openFilePicker() {
   fileInputRef.value?.click()
 }
 
-function handleFileChange(event) {
+async function handleFileChange(event) {
   const file = event.target.files?.[0]
 
   errorMessage.value = ''
@@ -40,18 +41,31 @@ function handleFileChange(event) {
     return
   }
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    profileImage.value = String(reader.result || '')
+  try {
     selectedFileName.value = file.name
-    localStorage.setItem('profileImage', profileImage.value)
-    successMessage.value = '프로필 이미지가 변경되었어요.'
+    const imageUrl = await uploadProfileImage(file)
+    profileImage.value = imageUrl
+    localStorage.setItem('profileImage', imageUrl)
+    successMessage.value = '프로필 이미지가 서버에 저장되었습니다.'
+  } catch (err) {
+    console.error(err)
+    errorMessage.value = err.response?.data || '서버에 업로드하는 중 오류가 발생했습니다.'
   }
-  reader.onerror = () => {
-    errorMessage.value = '이미지 파일을 읽는 중 오류가 발생했어요.'
-  }
-  reader.readAsDataURL(file)
 }
+
+// 초기 로드 시 서버에서 프로필 이미지 가져오기
+onMounted(async () => {
+  try {
+    const imageUrl = await getProfileImage()
+    if (imageUrl) {
+      profileImage.value = imageUrl
+      localStorage.setItem('profileImage', imageUrl)
+    }
+  } catch (err) {
+    // 이미지가 없거나 인증 문제 등은 무시하고 기본 UI 보여줌
+    console.debug('프로필 이미지 로드 실패:', err.response?.data || err.message)
+  }
+})
 </script>
 
 <template>
