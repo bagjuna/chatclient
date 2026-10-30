@@ -3,9 +3,10 @@ import api from '@/api/indexApi.js'
 
 export default {
     // 1. 이전 채팅 내역 조회
-    async getChatHistory(roomId) {
-        // indexApi의 인터셉터가 토큰을 자동으로 넣어줍니다.
-        const res = await api.get(`/api/chat/history/${roomId}`);
+    async getChatHistoryPaged(roomId, page = 1, size = 20, latest = false) {
+        const res = await api.get(`/api/chat/history/${roomId}/paged`, {
+            params: {page, size, latest}
+        });
         return res.data;
     },
 

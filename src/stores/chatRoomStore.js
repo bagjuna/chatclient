@@ -22,6 +22,9 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
     const lastReadMap = ref({}); // 예: { 'email1': 100, 'email2': 105 }
 
     const isReconnecting = ref(false); // 재연결 시도 중인지 여부
+    const historyPage = ref(1);
+    const hasOlderMessages = ref(false);
+    const isLoadingOlder = ref(false);
 
     // --- Getters (Computed) ---
     // 날짜별 메시지 그룹화 (UI에서 쓰기 편하게 가공)
@@ -46,8 +49,10 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
 
         try {
             // 1-1. 이전 채팅 내역 불러오기 (HTTP)
-            const history = await chatRoomApi.getChatHistory(roomId);
-            messages.value = history;
+            const history = await chatRoomApi.getChatHistoryPaged(roomId, 1, 20, true);
+            messages.value = history.list;
+            historyPage.value = history.pageRequestDTO.page;
+            hasOlderMessages.value = historyPage.value > 1;
             // 1-2 . 참여자 정보 설정
             const participants = await chatRoomApi.getParticipants(roomId);
 
@@ -59,6 +64,23 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             connectWebSocket(roomId);
         } catch (error) {
             console.error('방 입장 실패:', error);
+        }
+    };
+
+    const loadOlderMessages = async (roomId) => {
+        if (isLoadingOlder.value || !hasOlderMessages.value) return null;
+
+        isLoadingOlder.value = true;
+        try {
+            const history = await chatRoomApi.getChatHistoryPaged(
+                roomId, historyPage.value - 1, 20
+            );
+            messages.value = [...history.list, ...messages.value];
+            historyPage.value = history.pageRequestDTO.page;
+            hasOlderMessages.value = historyPage.value > 1;
+            return history;
+        } finally {
+            isLoadingOlder.value = false;
         }
     };
 
@@ -302,6 +324,9 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         roomInfo,
         myEmail,
         enterRoom,
+        loadOlderMessages,
+        hasOlderMessages,
+        isLoadingOlder,
         sendMessage,
         disconnect
     };

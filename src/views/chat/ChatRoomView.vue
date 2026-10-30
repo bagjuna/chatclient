@@ -13,6 +13,7 @@ const store = useChatRoomStore();
 // 입력창 상태
 const newMessage = ref('');
 const chatAreaRef = ref(null); // 스크롤용 ref
+const suppressNextAutoScroll = ref(false);
 
 // --- 라이프사이클 ---
 onMounted(() => {
@@ -37,10 +38,24 @@ const handleSendMessage = () => {
 watch(
     () => store.messages.length,
     async () => {
+      if (suppressNextAutoScroll.value) {
+        suppressNextAutoScroll.value = false;
+        return;
+      }
       await nextTick();
       scrollToBottom();
     }
 );
+
+const handleScroll = async (event) => {
+  if (event.target.scrollTop > 30 || !store.hasOlderMessages) return;
+
+  const previousHeight = event.target.scrollHeight;
+  suppressNextAutoScroll.value = true;
+  await store.loadOlderMessages(roomId);
+  await nextTick();
+  event.target.scrollTop = event.target.scrollHeight - previousHeight;
+};
 
 const scrollToBottom = () => {
   const chatArea = document.querySelector('.chat-area');
@@ -78,7 +93,7 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <main class="flex-1 overflow-y-auto p-4 pb-24 bg-slate-50 chat-area">
+      <main ref="chatAreaRef" @scroll="handleScroll" class="flex-1 overflow-y-auto p-4 pb-24 bg-slate-50 chat-area">
         <div v-for="(messagesInDate, date) in store.groupedMessages" :key="date">
           <div class="my-6 text-center">
             <span class="text-xs text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
@@ -181,4 +196,3 @@ const formatDate = (dateString) => {
   color: #a3a3a3;
 }
 </style>
-
